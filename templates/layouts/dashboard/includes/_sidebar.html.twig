@@ -1,0 +1,35 @@
+<div class="app-sidebar__overlay" data-toggle="sidebar"></div>
+<aside class="app-sidebar">
+
+    <div class="app-sidebar__user"><img class="app-sidebar__user-avatar" height="80px" width="80px"
+            src="{{ asset('layouts/dashboard/images/avatar.jpeg') }}" alt="User Image">
+        <div>
+            <p class="app-sidebar__user-name">{{app.user.fullName}}</p>
+            <p class="app-sidebar__user-designation"></p>
+        </div>
+    </div>
+
+    <ul class="app-menu">
+        <!-- Dashboard-->
+
+        <!-- Home Page -->
+        <li>
+            <a class="app-menu__item"
+                href="{{path('home')}}"><i class="app-menu__icon fa fa-globe"></i><span
+                    class="app-menu__label">Home</span>
+            </a>
+        </li>
+
+        <li>
+            <a class="app-menu__item"
+                href="{{path('parcels_home')}}"><i class="app-menu__icon fa fa-globe"></i><span
+                    class="app-menu__label">Percels</span>
+            </a>
+        </li>
+
+  
+
+
+
+    </ul>
+</aside>

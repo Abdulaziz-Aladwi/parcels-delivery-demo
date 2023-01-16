@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta
+		http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<!-- Meta, title, CSS, favicons, etc. -->
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Login</title>
+		<!-- Bootstrap -->
+		<link
+		href="{{asset('layouts/dashboard/vendors/bootstrap/dist/css/bootstrap.min.css')}}" rel="stylesheet">
+		<!-- Font Awesome -->
+		<link
+		href="{{asset('layouts/dashboard/vendors/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet">
+		<!-- NProgress -->
+		<link
+		href="{{asset('layouts/dashboard/vendors/nprogress/nprogress.css')}}" rel="stylesheet">
+		<!-- Animate.css -->
+		<link
+		href="{{asset('layouts/dashboard/vendors/animate.css/animate.min.css')}}" rel="stylesheet">
+
+		<!-- Custom Theme Style -->
+		<link href="{{asset('layouts/dashboard/build/css/custom.min.css')}}" rel="stylesheet">
+	</head>
+
+	<body class="login">
+		<div>
+			<a class="hiddenanchor" id="signup"></a>
+			<a class="hiddenanchor" id="signin"></a>
+
+			<div class="login_wrapper">
+				<div class="animate form login_form">
+					<section class="login_content">
+						<form action="{{path('login')}}" method="POST">
+
+                            {% if error %}
+                                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                            {% endif %}
+							
+                            <h1>Login</h1>
+							<div>
+								<input type="email" value="{{ last_username }}" id="inputEmail"  name='email' class="form-control" placeholder="Username" id="inputEmail" autocomplete="email" required autofocus/>
+							</div>
+							<div>
+								<input type="password" name='password' id="inputPassword" class="form-control" placeholder="Password" autocomplete="current-password" required/>
+							</div>
+                            
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+							
+                            <div>
+								<button class="btn btn-sm btn-primary" type="submit">
+									Sign in
+								</button>
+							</div>
+
+							<div class="clearfix"></div>
+
+							<div class="separator">
+
+								<div class="clearfix"></div>
+								<br/>
+
+								<div>
+									<h1>
+										<i class="fa fa-paw"></i>
+										Gentelella Alela!</h1>
+								</div>
+							</div>
+						</form>
+					</section>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
