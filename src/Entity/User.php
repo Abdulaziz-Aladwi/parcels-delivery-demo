@@ -2,14 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use App\Constant\UserTypes;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\ORM\Mapping\Index;
 
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table(name="`user`", indexes={
  *     @ORM\Index(columns={"type"})})
  */
@@ -60,7 +61,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * 
      * @ORM\Column(name="updated_at", type="datetime", nullable = true)
      */
-    protected $updatedAt;    
+    protected $updatedAt;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Parcel::class, mappedBy="sender")
+     */
+    private $parcels;
+
+  
+
+    public function __construct()
+    {
+        $this->parcels = new ArrayCollection();
+    }    
         
     public function getId(): ?int
     {
@@ -170,6 +183,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
+    public function setUpdatedAt($value)
+    {
+        $this->updatedAt = $value;
+
+        return $this;
+
+    }
+
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }    
     /**
      * Returning a salt is only needed, if you are not using a modern
      * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
@@ -188,6 +213,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
-    }    
+    }
+
+    /**
+     * @return Collection<int, Parcel>
+     */
+    public function getParcels(): Collection
+    {
+        return $this->parcels;
+    }
+
+    public function addParcel(Parcel $parcel): self
+    {
+        if (!$this->parcels->contains($parcel)) {
+            $this->parcels[] = $parcel;
+            $parcel->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParcel(Parcel $parcel): self
+    {
+        if ($this->parcels->removeElement($parcel)) {
+            // set the owning side to null (unless already changed)
+            if ($parcel->getSender() === $this) {
+                $parcel->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function isSender(): bool
+    {
+        return $this->type == UserTypes::TYPE_SENDER;
+    }
+  
 
 }

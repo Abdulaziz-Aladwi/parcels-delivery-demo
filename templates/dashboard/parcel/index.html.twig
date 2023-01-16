@@ -1,7 +1,80 @@
 {% extends 'base.html.twig' %}
 
-{% block title %} {{ title }}{% endblock %}
+{% block title %}
+	{{ title }}
+{% endblock %}
 
 {% block body %}
+	<main class="app-content">
+		<div class="app-title">
+			<div>
+				<h1>
+					<i class="fa fa-th-list"></i>
+					Parcels</h1>
+                    
+			</div>
+			<ul class="app-breadcrumb breadcrumb side">
+				<li class="breadcrumb-item">
+					<a href="">
+						<i class="fa fa-home fa-lg"></i>
+					</a>
+				</li>
+				<li class="breadcrumb-item active">Parcels</li>
+			</ul>
+		</div>
 
-{% endblock %}
+		<div class="text-right mb-1">
+			<a href="{{path('parcels_create_form')}}" class="btn btn-primary btn-sm">
+				<i class="fa fa-plus" aria-hidden="true">
+					Add</i>
+			</a>
+        {% include 'layouts/dashboard/includes/_flash.html.twig' %}
+
+
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<div class="tile">
+					<div class="tile-body">
+						<div class="table-responsive">
+							<div id="sampleTable_wrapper" class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
+
+								<div class="col-md-12">
+									<table class="table table-hover table-bordered dataTable no-footer cities-table" id="sampleTable" aria-describedby="sampleTable_info">
+										<thead>
+											<tr>
+												<th>#</th>
+												<th>Name</th>
+												<th>Picked Off Address</th>
+												<th>Status</th>
+												<th>BikerName</th>
+												<th>Created At</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for parcel in parcels %}
+												<tr>
+													<th scope="row">{{loop.index}}</th>
+													<td>{{parcel.name ?? '-' }}</td>
+													<td>{{parcel.pickOffAddress}}</td>
+													<td>{{parcel.statusString}}</td>
+													<td>{{parcel.biker.fullName ?? '-' }}</td>
+													<td>{{parcel.createdAt|date("m/d/Y")  }}</td>
+												</tr>
+											{% endfor %}
+											<div class="navigation"></tbody>
+										</tbody>
+									</table>
+									{{ knp_pagination_render(parcels) }}
+								</div>
+							</div>
+
+							<div class="row"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>{% endblock %}
