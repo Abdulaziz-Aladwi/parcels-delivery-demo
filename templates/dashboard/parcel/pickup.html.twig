@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ title }}
+{% endblock %}
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+
+
+{% block body %}
+	<main class="app-content">
+		<div class="app-title">
+			<div>
+				<h1>
+					<i class="fa fa-th-list"></i>
+					{{ title }}</h1>
+			</div>
+			<ul class="app-breadcrumb breadcrumb side">
+				<li class="breadcrumb-item">
+					<a href="{{path('parcels_home')}}">Parcels</a>
+				</li>
+				<li class="breadcrumb-item active">{{title}}</li>
+			</ul>
+		</div>
+		<div class="container">
+			<div class="col-md-12 mx-auto">
+				<div class="tile">
+					<h3 class="tile-title">{{title}}</h3>
+					<div
+						class="tile-body">
+					
+						{{ form_start(form) }}
+						{{ form_widget(form) }}
+						<div class="tile-footer">
+							<button class="btn btn-primary" type="submit">Save</button>
+						</div>
+						{{ form_end(form) }}
+
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</main>
+{% endblock %}

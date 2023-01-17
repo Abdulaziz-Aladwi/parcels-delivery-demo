@@ -190,9 +190,9 @@ class Parcel
         return $this->createdAt;
     }
 
-    public function setUpdatedAt($value)
+    public function setUpdatedAt()
     {
-        $this->updatedAt = $value;
+        $this->updatedAt =  new \DateTime("now");;
 
         return $this;
 
@@ -207,4 +207,11 @@ class Parcel
     {
         return ParcelStatus::getLabel($this->status);
     }
+
+    public function isPendingStatus(): bool
+    {
+        return $this->status == ParcelStatus::TYPE_PENDING;
+    }
+
+    
 }

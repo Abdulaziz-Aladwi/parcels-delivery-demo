@@ -2,11 +2,15 @@
 
 namespace App\Service;
 
+use App\Constant\ParcelStatus;
+use App\Constant\UserTypes;
 use App\Entity\Parcel;
+use App\Form\BikerParcelFormType;
 use App\Form\SenderParcelFormType;
 use App\Repository\ParcelRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -92,5 +96,49 @@ class ParcelService
         $parcel->setSender($this->security->getUser());
         $parcel->setCreatedAt();
         return $parcel;
+    }
+
+    public function createBikerParcelForm(Parcel $parcel): Form
+    {
+        return $this->formFactory->create(BikerParcelFormType::class, $parcel, [
+            'action' => $this->urlGenerator->generate('parcels_update',  ['id' => $parcel->getId()]),
+            'method' => 'POST',
+        ]); 
+    }
+
+    public function update(Request $request, $parcel)
+    {
+        $form = $this->formFactory->create(BikerParcelFormType::class, $parcel);
+
+        $parcel = $this->prepareObjectForPickup($parcel);
+        $form->handleRequest($request);
+
+
+        $formIsValid = ($form->isSubmitted()) && ($form->isValid());
+        $dataSaved = false;
+
+
+        if ($formIsValid) {
+            $this->entityManager->flush();
+            $dataSaved = true;
+        }
+
+        return $dataSaved;
+    }
+
+    public function prepareObjectForPickup(Parcel $parcel): Parcel
+    {
+        $parcel->setBiker($this->security->getUser());
+        $parcel->setStatus(ParcelStatus::TYPE_PICKED_UP);
+        $parcel->setUpdatedAt();
+
+        return $parcel;
+    }
+
+    public function validateParcelStatus(Parcel $parcel)
+    {
+        if ($parcel->getStatus() == ParcelStatus::TYPE_PICKED_UP) {
+            throw new Exception('Parcel Already Picked Up ');
+        }
     }
 }

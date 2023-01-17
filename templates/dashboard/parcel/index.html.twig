@@ -4,6 +4,10 @@
 	{{ title }}
 {% endblock %}
 
+{%set USER_HAS_BIKER_ROLE = 'ROLE_BIKER' in app.user.roles %}
+{%set USER_HAS_SENDER_ROLE = 'ROLE_SENDER' in app.user.roles %}
+
+
 {% block body %}
 	<main class="app-content">
 		<div class="app-title">
@@ -23,12 +27,14 @@
 			</ul>
 		</div>
 
-		<div class="text-right mb-1">
-			<a href="{{path('parcels_create_form')}}" class="btn btn-primary btn-sm">
-				<i class="fa fa-plus" aria-hidden="true">
-					Add</i>
-			</a>
-        {% include 'layouts/dashboard/includes/_flash.html.twig' %}
+			{% if USER_HAS_SENDER_ROLE %}
+			<div class="text-right mb-1">
+						<a href="{{path('parcels_create_form')}}" class="btn btn-primary btn-sm">
+							<i class="fa fa-plus" aria-hidden="true">
+								Add</i>
+						</a>
+			{% endif %}
+			{% include 'layouts/dashboard/includes/_flash.html.twig' %}
 
 
 		</div>
@@ -50,10 +56,13 @@
 												<th>Status</th>
 												<th>BikerName</th>
 												<th>Created At</th>
+												<th>Action</th>
+
 											</tr>
 										</thead>
 										<tbody>
 											{% for parcel in parcels %}
+											{% set CAN_PICK_UP_PARCEL = USER_HAS_BIKER_ROLE and parcel.isPendingStatus %}
 												<tr>
 													<th scope="row">{{loop.index}}</th>
 													<td>{{parcel.name ?? '-' }}</td>
@@ -61,6 +70,14 @@
 													<td>{{parcel.statusString}}</td>
 													<td>{{parcel.biker.fullName ?? '-' }}</td>
 													<td>{{parcel.createdAt|date("m/d/Y")  }}</td>
+													
+													<td>
+														<a 
+														href="{{path('parcels_update_form', {'id':parcel.id} ) }}"
+														class="btn btn-primary btn-sm {{CAN_PICK_UP_PARCEL ? '' : 'disabled'}}">{{ CAN_PICK_UP_PARCEL ? 'Pickup' : 'Not Permitted'}}</a>
+													</td>
+													
+
 												</tr>
 											{% endfor %}
 											<div class="navigation"></tbody>
@@ -77,4 +94,5 @@
 			</div>
 		</div>
 	</div>
-</main>{% endblock %}
+</main>
+{% endblock %}

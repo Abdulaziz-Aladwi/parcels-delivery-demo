@@ -250,5 +250,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->type == UserTypes::TYPE_SENDER;
     }
   
-
+    public function getTypeString(): string
+    {
+        return UserTypes::getUserTypes()[$this->type];
+    }
 }

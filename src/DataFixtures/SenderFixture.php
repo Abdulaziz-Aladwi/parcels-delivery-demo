@@ -25,7 +25,7 @@ class SenderFixture extends Fixture
             $user->setEmail(sprintf('Sender_%s@me.com', $i + 1));
             $user->setPassword($this->passwordHasher->hashPassword($user, '102030'));
             $user->setType(UserTypes::TYPE_SENDER);
-            $user->setRoles(['ROLE_Sender']);
+            $user->setRoles(['ROLE_SENDER']);
             $user->setCreatedAt();
 
             $manager->persist($user);

@@ -7,7 +7,6 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Security\Core\Security;
 
 /**
  * @extends ServiceEntityRepository<Parcel>
@@ -22,10 +21,9 @@ class ParcelRepository extends ServiceEntityRepository
     /** @var User */
     private $user;
     
-    public function __construct(ManagerRegistry $registry, Security $security)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Parcel::class);
-        $this->user = $security->getUser();
     }
 
     public function add(Parcel $entity, bool $flush = false): void
@@ -46,23 +44,40 @@ class ParcelRepository extends ServiceEntityRepository
         }
     }
 
-    public function get(): QueryBuilder
+    public function get(array $criteria = []): QueryBuilder
     {
-        return $this->createQueryBuilder('parcel')
-            ->andWhere('parcel.sender = :val')
-            ->setParameter('val', $this->user)
-            ->leftJoin('parcel.biker', 'biker')
-            ->orderBy('parcel.createdAt', 'desc');
+        $queryBuilder =  $this->createQueryBuilder('parcel');
+
+        if ( isset($criteria['sender']) ) {
+            $queryBuilder->andWhere('parcel.sender = :sender')->setParameter('sender', $criteria['sender']);
+        }
+
+        if ( isset($criteria['biker']) ) {
+            $queryBuilder->andWhere('parcel.biker = :biker')->setParameter('biker', $criteria['biker']);
+        }     
+
+        if ( isset($criteria['status']) ) {
+            $queryBuilder->andWhere('parcel.status = :status')->setParameter('status', $criteria['status']);
+        }     
+
+           return $queryBuilder->leftJoin('parcel.biker', 'biker')
+                ->orderBy('parcel.createdAt', 'desc');
     }
 
     public function getParcelsCount($criteria): int
     {
         $queryBuilder = $this->createQueryBuilder('parcel')->select('count(parcel.id)');
-        $queryBuilder->andWhere('parcel.sender = :val')->setParameter('val', $this->user);
 
-        if ($criteria['status']) {
-            $queryBuilder->andWhere('parcel.status = :status')
-                ->setParameter('status', $criteria['status']);
+        if ( isset($criteria['sender']) ) {
+            $queryBuilder->andWhere('parcel.sender = :sender')->setParameter('sender', $criteria['sender']);
+        }
+
+        if ( isset($criteria['biker']) ) {
+            $queryBuilder->andWhere('parcel.biker = :biker')->setParameter('biker', $criteria['biker']);
+        }        
+
+        if ( isset($criteria['status']) ) {
+            $queryBuilder->andWhere('parcel.status = :status')->setParameter('status', $criteria['status']);
         }
         
         return $queryBuilder->getQuery()->getSingleScalarResult();

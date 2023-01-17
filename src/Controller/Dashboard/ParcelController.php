@@ -2,6 +2,7 @@
 
 namespace App\Controller\Dashboard;
 
+use App\Entity\Parcel;
 use App\Form\ParcelFormType;
 use App\Form\SenderParcelFormType;
 use App\Service\ParcelService;
@@ -35,6 +36,7 @@ class ParcelController extends AbstractController
      */
     public function index(Request $request): Response
     {
+
         $parcelsQueryBuilder = $this->parcelService->list();
 
         $parcels = $this->parcelService->paginate(
@@ -48,9 +50,10 @@ class ParcelController extends AbstractController
     
     /**
      * @Route("/create/form", name="parcels_create_form")
+     * @IsGranted("ROLE_SENDER")
      * @Method({"GET"})
      */
-    public function formAction(): Response
+    public function createFormAction(): Response
     {
         $form = $this->parcelService->createSenderParcelForm();
         return $this->render('dashboard/parcel/create.html.twig',['title' => 'Create Parcels', 'form' => $form->createView()]);
@@ -58,12 +61,37 @@ class ParcelController extends AbstractController
 
     /**
      * @Route("/create", name="parcels_create")
+     * @IsGranted("ROLE_SENDER")
      * @Method({"POST"})
      */
-    public function create(Request $request)
+    public function createAction(Request $request)
     {
         $this->parcelService->create($request);
         $this->addFlash('success', 'Parcel Created Successfully!');
         return $this->redirectToRoute('parcels_home');
-    }    
+    } 
+    
+    /**
+     * @Route("/update/{id}/form", name="parcels_update_form")
+     * @IsGranted("ROLE_BIKER")
+     * @Method({"GET"})
+     */
+    public function pickUpFormAction(Parcel $parcel): Response
+    {
+        $this->parcelService->validateParcelStatus($parcel);
+        $form = $this->parcelService->createBikerParcelForm($parcel);
+        return $this->render('dashboard/parcel/pickup.html.twig',['title' => 'Pick Up Parcels', 'form' => $form->createView()]);
+    }
+
+    /**
+     * @Route("/update/{id}", name="parcels_update")
+     * @IsGranted("ROLE_BIKER")
+     * @Method({"POST"})
+     */
+    public function updateAction(Request $request, Parcel $parcel)
+    {
+        $this->parcelService->update($request, $parcel);
+        $this->addFlash('success', 'Parcel Created Successfully!');
+        return $this->redirectToRoute('parcels_home');
+    }      
 }
