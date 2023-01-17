@@ -14,14 +14,14 @@
 
         <!-- Home Page -->
         <li>
-            <a class="app-menu__item"
+            <a class="app-menu__item {{app.request.get('_route') == 'home' ? 'active' : ''}}" 
                 href="{{path('home')}}"><i class="app-menu__icon fa fa-globe"></i><span
                     class="app-menu__label">Home</span>
             </a>
         </li>
 
         <li>
-            <a class="app-menu__item"
+            <a class="app-menu__item {{app.request.get('_route') == 'parcels_home' ? 'active' : ''}}"
                 href="{{path('parcels_home')}}"><i class="app-menu__icon fa fa-globe"></i><span
                     class="app-menu__label">Percels</span>
             </a>

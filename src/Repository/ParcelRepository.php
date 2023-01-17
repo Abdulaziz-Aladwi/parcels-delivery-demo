@@ -54,4 +54,17 @@ class ParcelRepository extends ServiceEntityRepository
             ->leftJoin('parcel.biker', 'biker')
             ->orderBy('parcel.createdAt', 'desc');
     }
+
+    public function getParcelsCount($criteria): int
+    {
+        $queryBuilder = $this->createQueryBuilder('parcel')->select('count(parcel.id)');
+        $queryBuilder->andWhere('parcel.sender = :val')->setParameter('val', $this->user);
+
+        if ($criteria['status']) {
+            $queryBuilder->andWhere('parcel.status = :status')
+                ->setParameter('status', $criteria['status']);
+        }
+        
+        return $queryBuilder->getQuery()->getSingleScalarResult();
+    }
 }
