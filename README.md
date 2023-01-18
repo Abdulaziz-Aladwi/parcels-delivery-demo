@@ -24,7 +24,7 @@ composer install
 php bin/console doctrine:migrations:migrate
 ```
 
-4- Load Admin fixture to get Admin user using:
+4- Load Admin fixture to get Sender and Biker users using:
 
 ```bash
 php bin/console doctrine:fixtures:load
