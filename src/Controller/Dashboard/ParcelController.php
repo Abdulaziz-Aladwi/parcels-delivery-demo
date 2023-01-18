@@ -3,6 +3,7 @@
 namespace App\Controller\Dashboard;
 
 use App\Entity\Parcel;
+use App\Service\PaginatorService;
 use App\Service\ParcelService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,12 +25,16 @@ class ParcelController extends AbstractController
     private $parcelService;
 
     /** @var Security */
-    private $security;    
+    private $security;  
+    
+    /** @var PaginatorService */
+    private $paginatorService;  
 
-    public function __construct(ParcelService $parcelService, Security $security)
+    public function __construct(ParcelService $parcelService, Security $security, PaginatorService $paginatorService)
     {
         $this->parcelService = $parcelService; 
         $this->security = $security;   
+        $this->paginatorService = $paginatorService;   
     }
 
     /**
@@ -40,7 +45,7 @@ class ParcelController extends AbstractController
         $criteria = $this->parcelService->buildParcelsCriteria($this->security->getUser());
         $parcelsQueryBuilder = $this->parcelService->list($criteria);
 
-        $parcels = $this->parcelService->paginate(
+        $parcels = $this->paginatorService->paginate(
             $parcelsQueryBuilder,
             $request->query->getInt('page', self::FIRST_PAGE),
             self::PAGINATION_LIMIT
@@ -109,7 +114,7 @@ class ParcelController extends AbstractController
     public function updateAction(Request $request, Parcel $parcel)
     {
         $this->parcelService->update($request, $parcel);
-        $this->addFlash('success', 'Parcel Created Successfully!');
+        $this->addFlash('success', 'Parcel Picked up Successfully!');
         return $this->redirectToRoute('parcels_home');
     }
 }

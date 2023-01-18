@@ -6,13 +6,11 @@ use App\Constant\ParcelStatus;
 use App\Entity\Parcel;
 use App\Entity\User;
 use App\Form\BikerParcelFormType;
-use App\Form\ParcelFormType;
 use App\Form\SenderParcelFormType;
 use App\Repository\ParcelRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,9 +21,6 @@ class ParcelService
 {
     /** @var ParcelRepository */
     private $parcelRepository;
-
-    /** @var PaginatorInterface */
-    private $paginator;    
 
     /** @var FormFactoryInterface */
     private $formFactory;    
@@ -41,7 +36,6 @@ class ParcelService
         
     public function __construct(
         ParcelRepository $parcelRepository,
-        PaginatorInterface $paginator, 
         FormFactoryInterface $formFactory,
         EntityManagerInterface $entityManager,
         Security $security,
@@ -49,7 +43,6 @@ class ParcelService
         )
     {
         $this->parcelRepository = $parcelRepository;
-        $this->paginator = $paginator;
         $this->formFactory = $formFactory;
         $this->entityManager = $entityManager;
         $this->security = $security;
@@ -65,11 +58,6 @@ class ParcelService
     {
         return $user->isSender() ? ['sender' => $user] : [];
     } 
-    
-    public function paginate(QueryBuilder $queryBuilder, int $page = 1, int $limit)
-    {
-        return $this->paginator->paginate($queryBuilder, $page, $limit);
-    }
 
     public function create(Request $request): bool
     {
