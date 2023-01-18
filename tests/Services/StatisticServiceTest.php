@@ -7,15 +7,15 @@ use App\Constant\UserTypes;
 use App\Entity\Parcel;
 use App\Entity\User;
 use App\Service\ParcelService;
+use App\Service\StatisticService;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use function PHPUnit\Framework\assertArrayHasKey;
-use function PHPUnit\Framework\assertEquals;
-use function PHPUnit\Framework\assertInstanceOf;
 
-class ParcelServiceTest extends KernelTestCase
+use function PHPUnit\Framework\assertEquals;
+
+class StatisticServiceTest extends KernelTestCase
 {
     /** @var EntityManagerInterface  */
     private $entityManager;
@@ -27,63 +27,56 @@ class ParcelServiceTest extends KernelTestCase
     private $biker;    
 
     /** @var Parcel  */
-    private $parcel;
+    private $pendingParcel;
 
-    /** @var ParcelService  */
-    private $parcelService;
+    /** @var Parcel  */
+    private $pickedUpParcel;    
+
+    /** @var StatisticService  */
+    private $statisticService;
 
     public function setup(): void
     {
         $this->entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
-        $this->parcelService = static::getContainer()->get('App\Service\ParcelService');
+        $this->statisticService = static::getContainer()->get('App\Service\StatisticService');
         
         $this->sender = $this->createSender();
         $this->biker = $this->createBiker();
-        $this->parcel = $this->createParcel();
+        $this->pendingParcel = $this->createPendingParcel();
+        $this->pickedUpParcel = $this->createPickedUpParcel();
     }
 
-    public function test_should_return_query_builder()
+    public function test_should_return_correct__pending_parcel_count()
     {
-        $parcelsQueryBuilder = $this->parcelService->list([]);
-        assertInstanceOf(QueryBuilder::class, $parcelsQueryBuilder);
+        $criteria  = ['sender' => $this->sender, 'status' => ParcelStatus::TYPE_PENDING];
+        $parcelsCount = $this->statisticService->getParcelsCount($criteria);
+        assertEquals($parcelsCount, 1);
     }
 
-    public function test_should_return_sender_in_criteria_if_given_user_is_sender()
+
+    public function test_should_return_correct__picked_up_parcel_count()
     {
-        $criteria = $this->parcelService->buildParcelsCriteria($this->sender);
-        assertArrayHasKey('sender', $criteria);
-        assertEquals($criteria['sender']->getId(), $this->sender->getId());
+        $criteria  = ['sender' => $this->sender, 'status' => ParcelStatus::TYPE_PICKED_UP];
+        $parcelsCount = $this->statisticService->getParcelsCount($criteria);
+        assertEquals($parcelsCount, 1);
     }
 
-    public function test_should_through_exception_if_parcel_already_picked_up()
+    public function test_should_return_total_sender_parcels_count_regardless_status()
     {
-        $this->expectExceptionMessage('Parcel Already Picked Up');
-        $this->parcelService->validateParcelStatus($this->parcel);
-    }
+        $criteria  = ['sender' => $this->sender];
+        $parcelsCount = $this->statisticService->getParcelsCount($criteria);
+        assertEquals($parcelsCount, 2);
+    }    
 
-    public function test_should_confirm_biker_parcel_creation_form()
-    {
-        $bikerParcelForm = $this->parcelService->createBikerParcelForm($this->parcel);
-        assertEquals($bikerParcelForm->getData()->getId(), $this->parcel->getId());
-        assertEquals($bikerParcelForm->getData()->getBiker()->getId(), $this->biker->getId());  
-    }
-
-    public function test_should_confirm_sender_parcel_creation_form()
-    {
-        $bikerParcelForm = $this->parcelService->createSenderParcelForm($this->parcel);
-        assertEquals($bikerParcelForm->getData()->getId(), $this->parcel->getId());
-        assertEquals($bikerParcelForm->getData()->getSender()->getId(), $this->sender->getId());  
-    }
-
-    private function createParcel(): Parcel
+    private function createPendingParcel(): Parcel
     {
         $parcel = new Parcel;
         $parcel->setName('testParcel');
         $parcel->setSender($this->sender);
         $parcel->setBiker($this->biker);
-        $parcel->setPickUpAddress('edasf');
-        $parcel->setPickOffAddress('regfsdf');
-        $parcel->setStatus(ParcelStatus::TYPE_PICKED_UP);
+        $parcel->setPickUpAddress('pick up address');
+        $parcel->setPickOffAddress('pick off address');
+        $parcel->setStatus(ParcelStatus::TYPE_PENDING);
         $parcel->setCreatedAt(new \DateTime("now"));
         
 
@@ -92,6 +85,24 @@ class ParcelServiceTest extends KernelTestCase
 
         return $parcel;
     }
+
+    private function createPickedUpParcel(): Parcel
+    {
+        $parcel = new Parcel;
+        $parcel->setName('testParcel');
+        $parcel->setSender($this->sender);
+        $parcel->setBiker($this->biker);
+        $parcel->setPickUpAddress('pick up address');
+        $parcel->setPickOffAddress('pick off address');
+        $parcel->setStatus(ParcelStatus::TYPE_PICKED_UP);
+        $parcel->setCreatedAt(new \DateTime("now"));
+        
+
+        $this->entityManager->persist($parcel);
+        $this->entityManager->flush();
+
+        return $parcel;
+    }    
 
     private function createSender(): User
     {
@@ -108,7 +119,7 @@ class ParcelServiceTest extends KernelTestCase
 
         return $user;
 
-    }   
+    }
     
     private function createBiker(): User
     {
