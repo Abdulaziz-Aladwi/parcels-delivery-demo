@@ -149,9 +149,4 @@ class ParcelService
             throw new Exception('Parcel Already Picked Up ');
         }
     }
-
-    public function createParcelForm($parcel): Form
-    {
-      return $this->formFactory->create(ParcelFormType::class, $parcel);
-    }
 }
