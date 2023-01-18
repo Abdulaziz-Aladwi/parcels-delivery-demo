@@ -2,16 +2,17 @@
 
 namespace App\Service;
 
+use App\Abstraction\PaginationInterface;
 use App\Constant\ParcelStatus;
-use App\Constant\UserTypes;
 use App\Entity\Parcel;
+use App\Entity\User;
 use App\Form\BikerParcelFormType;
+use App\Form\ParcelFormType;
 use App\Form\SenderParcelFormType;
 use App\Repository\ParcelRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,10 +24,10 @@ class ParcelService
     /** @var ParcelRepository */
     private $parcelRepository;
 
-    /** @var PaginatorInterface */
+    /** @var PaginationInterface */
     private $paginator;    
 
-    /** @var PaginatorInterface */
+    /** @var FormFactoryInterface */
     private $formFactory;    
 
     /** @var EntityManagerInterface */
@@ -40,7 +41,7 @@ class ParcelService
         
     public function __construct(
         ParcelRepository $parcelRepository,
-        PaginatorInterface $paginator, 
+        PaginationInterface $paginator, 
         FormFactoryInterface $formFactory,
         EntityManagerInterface $entityManager,
         Security $security,
@@ -55,15 +56,15 @@ class ParcelService
         $this->urlGenerator = $urlGenerator;
     }
 
-    public function list(): QueryBuilder
+    public function list(array $criteria): QueryBuilder
     {
-        return $this->parcelRepository->get();
+        return $this->parcelRepository->get($criteria);
     }
 
-    public function paginate(QueryBuilder $queryBuilder,int $page,int $maxRecordsPerPage)
+    public function buildParcelsCriteria(User $user): array
     {
-        return $this->paginator->paginate($queryBuilder, $page,$maxRecordsPerPage);
-    }
+        return $user->isSender() ? ['sender' => $user] : [];
+    }    
 
     public function create(Request $request): bool
     {
@@ -80,14 +81,14 @@ class ParcelService
         }
 
         return $dataSaved;
-
     }
 
-    public function createSenderParcelForm(): Form
+    public function createSenderParcelForm($parcel = null, bool $disableForm = false): Form
     {
-        return $this->formFactory->create(SenderParcelFormType::class, null, [
+        return $this->formFactory->create(SenderParcelFormType::class, $parcel, [
             'action' => $this->urlGenerator->generate('parcels_create'),
             'method' => 'POST',
+            'disabled' => $disableForm
         ]);
     }
 
@@ -98,15 +99,16 @@ class ParcelService
         return $parcel;
     }
 
-    public function createBikerParcelForm(Parcel $parcel): Form
+    public function createBikerParcelForm(Parcel $parcel, bool $disableForm = false): Form
     {
         return $this->formFactory->create(BikerParcelFormType::class, $parcel, [
             'action' => $this->urlGenerator->generate('parcels_update',  ['id' => $parcel->getId()]),
             'method' => 'POST',
+            'disabled' => $disableForm
         ]); 
     }
 
-    public function update(Request $request, $parcel)
+    public function update(Request $request, $parcel): bool
     {
         $form = $this->formFactory->create(BikerParcelFormType::class, $parcel);
 
@@ -140,5 +142,10 @@ class ParcelService
         if ($parcel->getStatus() == ParcelStatus::TYPE_PICKED_UP) {
             throw new Exception('Parcel Already Picked Up ');
         }
+    }
+
+    public function createParcelForm($parcel): Form
+    {
+      return $this->formFactory->create(ParcelFormType::class, $parcel);
     }
 }

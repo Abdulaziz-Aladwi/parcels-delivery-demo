@@ -2,33 +2,39 @@
 
 namespace App\Controller\Dashboard;
 
+use App\Abstraction\PaginationInterface;
 use App\Entity\Parcel;
-use App\Form\ParcelFormType;
-use App\Form\SenderParcelFormType;
 use App\Service\ParcelService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-
+use Symfony\Component\Security\Core\Security;
 
 /**
  * @Route("dashboard/parcels")
  */
 class ParcelController extends AbstractController
 {
-    const MAX_RECORDS_PER_PAGE = 10;
+    const PAGINATION_LIMIT = 10;
     const FIRST_PAGE = 1;
 
     /** @var ParcelService */
     private $parcelService;
 
-    public function __construct(ParcelService $parcelService)
+    /** @var PaginationInterface */
+    private $paginationService;    
+
+    /** @var Security */
+    private $security;    
+
+    public function __construct(ParcelService $parcelService, PaginationInterface $paginationService, Security $security)
     {
-        $this->parcelService = $parcelService;   
+        $this->parcelService = $parcelService; 
+        $this->paginationService = $paginationService;  
+        $this->security = $security;   
     }
 
     /**
@@ -36,16 +42,33 @@ class ParcelController extends AbstractController
      */
     public function index(Request $request): Response
     {
+        $criteria = $this->parcelService->buildParcelsCriteria($this->security->getUser());
+        $parcelsQueryBuilder = $this->parcelService->list($criteria);
 
-        $parcelsQueryBuilder = $this->parcelService->list();
-
-        $parcels = $this->parcelService->paginate(
+        $parcels = $this->paginationService->paginate(
             $parcelsQueryBuilder,
             $request->query->getInt('page', self::FIRST_PAGE),
-            self::MAX_RECORDS_PER_PAGE
+            self::PAGINATION_LIMIT
         );
 
         return $this->render('dashboard/parcel/index.html.twig',['title' => 'Parcels', 'parcels' => $parcels]);
+    }  
+    
+    /**
+     * @Route("/parcel/{id}", name="parcel_show")
+     * @Method({"GET"})
+     */
+    public function showAction(Parcel $parcel)
+    {
+        $senderForm = $this->parcelService->createSenderParcelForm($parcel, true);
+        $bikerForm = $this->parcelService->createBikerParcelForm($parcel, true);
+
+        return $this->render('dashboard/parcel/show.html.twig',[
+            'title' => 'Parcel Details',
+            'parcel' => $parcel,
+            'senderForm' => $senderForm->createView(),
+            'bikerForm' => $bikerForm->createView()
+        ]);
     }    
     
     /**
@@ -93,5 +116,5 @@ class ParcelController extends AbstractController
         $this->parcelService->update($request, $parcel);
         $this->addFlash('success', 'Parcel Created Successfully!');
         return $this->redirectToRoute('parcels_home');
-    }      
+    }
 }

@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ title }}
+{% endblock %}
+
+{% form_theme senderForm 'bootstrap_4_layout.html.twig' %}
+{% form_theme bikerForm 'bootstrap_4_layout.html.twig' %}
+
+{% set PARCEL_STATUS_PICKED_UP = parcel.isPickedUpStatus %}
+
+{% block body %}
+	<main class="app-content">
+		<div class="app-title">
+			<div>
+				<h1>
+					<i class="fa fa-th-list"></i>
+					{{ title }}</h1>
+			</div>
+			<ul class="app-breadcrumb breadcrumb side">
+				<li class="breadcrumb-item">
+					<a href="{{path('parcels_home')}}">Parcels</a>
+				</li>
+				<li class="breadcrumb-item active">{{title}} </li>
+			</ul>
+		</div>
+		<div class="container">
+			<div class="col-md-12 mx-auto">
+				<div class="tile">
+					<h3 class="tile-title">{{title}} - {{parcel.statusString}} </h3>
+					<div
+						class="tile-body">
+
+                        {{ form(senderForm) }}
+
+                        {% if  PARCEL_STATUS_PICKED_UP %}
+                            {{ form_row(bikerForm.pickUpDate, {'label': 'Pick up date' }) }}
+                            {{ form_row(bikerForm.deliveryDate, {'label': 'Delivery date'}) }}
+                        {% endif %}
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</main>
+{% endblock %}

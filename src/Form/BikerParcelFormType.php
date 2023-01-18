@@ -26,7 +26,7 @@ class BikerParcelFormType extends AbstractType
             ->add('name', TextType::class,  ['disabled' => true])
             ->add('pickUpAddress', TextType::class, ['disabled' => true])
             ->add('pickOffAddress', TextType::class, ['disabled' => true])
-            ->add('pickUpDate', DateTimeType::class, ['required' => true])
+            ->add('pickUpDate', DateType::class, ['required' => true])
             ->add('deliveryDate', DateType::class, ['required' => true]);
     }
 

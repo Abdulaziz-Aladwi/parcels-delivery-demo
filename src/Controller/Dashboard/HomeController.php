@@ -27,8 +27,8 @@ class HomeController extends AbstractController
     {
         $this->statisticService = $statisticService;
         $this->security = $security;
-
     }
+    
     /**
      * @Route("/", name="home")
      */
@@ -38,11 +38,13 @@ class HomeController extends AbstractController
 
         $user = $this->security->getUser();
      
-        foreach(ParcelStatus::getParcelStatus() as $key=>$status) {
+        foreach(ParcelStatus::getParcelStatus() as $key => $status) {
+            
             $criteria = ['status' => $key, $user->getTypeString() => $user];
+
             $data[$status] = $this->statisticService->getParcelsCount($criteria);
         }
-        
+
         return $this->render('dashboard/home/index.html.twig',['title' => 'Home', 'data' => $data]);
     }    
     

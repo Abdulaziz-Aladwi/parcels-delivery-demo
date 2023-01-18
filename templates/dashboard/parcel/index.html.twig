@@ -31,7 +31,7 @@
 			<div class="text-right mb-1">
 						<a href="{{path('parcels_create_form')}}" class="btn btn-primary btn-sm">
 							<i class="fa fa-plus" aria-hidden="true">
-								Add</i>
+								Send New Parcel</i>
 						</a>
 			{% endif %}
 			{% include 'layouts/dashboard/includes/_flash.html.twig' %}
@@ -72,12 +72,13 @@
 													<td>{{parcel.createdAt|date("m/d/Y")  }}</td>
 													
 													<td>
-														<a 
-														href="{{path('parcels_update_form', {'id':parcel.id} ) }}"
-														class="btn btn-primary btn-sm {{CAN_PICK_UP_PARCEL ? '' : 'disabled'}}">{{ CAN_PICK_UP_PARCEL ? 'Pickup' : 'Not Permitted'}}</a>
+														{% if USER_HAS_BIKER_ROLE %}
+															<a  
+															href="{{path('parcels_update_form', {'id':parcel.id} ) }}"
+															class="btn btn-sm {{CAN_PICK_UP_PARCEL ? 'btn-primary' : 'disabled btn-secondary'}}">{{ CAN_PICK_UP_PARCEL ? 'Pickup' : 'Not Permitted'}}</a>
+														{% endif %}
+														<a href="{{path('parcel_show', {'id':parcel.id} ) }}" class="btn btn-sm btn-primary">view</a>
 													</td>
-													
-
 												</tr>
 											{% endfor %}
 											<div class="navigation"></tbody>

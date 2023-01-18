@@ -74,6 +74,12 @@ class Parcel
      */
     protected $updatedAt;
 
+
+    /**
+     * Parcel Status String
+     *
+     * @var string
+     */
     protected $statusString;
 
     public function getId(): ?int
@@ -195,14 +201,13 @@ class Parcel
         $this->updatedAt =  new \DateTime("now");;
 
         return $this;
-
     }
 
     public function getUpdatedAt()
     {
         return $this->updatedAt;
     }
-
+  
     public function getStatusString(): String
     {
         return ParcelStatus::getLabel($this->status);
@@ -212,6 +217,11 @@ class Parcel
     {
         return $this->status == ParcelStatus::TYPE_PENDING;
     }
+
+    public function isPickedUpStatus(): bool
+    {
+        return $this->status == ParcelStatus::TYPE_PICKED_UP;
+    }    
 
     
 }
