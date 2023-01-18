@@ -2,7 +2,6 @@
 
 namespace App\Controller\Dashboard;
 
-use App\Abstraction\PaginationInterface;
 use App\Entity\Parcel;
 use App\Service\ParcelService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,16 +23,12 @@ class ParcelController extends AbstractController
     /** @var ParcelService */
     private $parcelService;
 
-    /** @var PaginationInterface */
-    private $paginationService;    
-
     /** @var Security */
     private $security;    
 
-    public function __construct(ParcelService $parcelService, PaginationInterface $paginationService, Security $security)
+    public function __construct(ParcelService $parcelService, Security $security)
     {
         $this->parcelService = $parcelService; 
-        $this->paginationService = $paginationService;  
         $this->security = $security;   
     }
 
@@ -45,7 +40,7 @@ class ParcelController extends AbstractController
         $criteria = $this->parcelService->buildParcelsCriteria($this->security->getUser());
         $parcelsQueryBuilder = $this->parcelService->list($criteria);
 
-        $parcels = $this->paginationService->paginate(
+        $parcels = $this->parcelService->paginate(
             $parcelsQueryBuilder,
             $request->query->getInt('page', self::FIRST_PAGE),
             self::PAGINATION_LIMIT

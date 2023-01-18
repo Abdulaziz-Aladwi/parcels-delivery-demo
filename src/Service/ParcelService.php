@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Abstraction\PaginationInterface;
 use App\Constant\ParcelStatus;
 use App\Entity\Parcel;
 use App\Entity\User;
@@ -13,6 +12,7 @@ use App\Repository\ParcelRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +24,7 @@ class ParcelService
     /** @var ParcelRepository */
     private $parcelRepository;
 
-    /** @var PaginationInterface */
+    /** @var PaginatorInterface */
     private $paginator;    
 
     /** @var FormFactoryInterface */
@@ -41,7 +41,7 @@ class ParcelService
         
     public function __construct(
         ParcelRepository $parcelRepository,
-        PaginationInterface $paginator, 
+        PaginatorInterface $paginator, 
         FormFactoryInterface $formFactory,
         EntityManagerInterface $entityManager,
         Security $security,
@@ -64,7 +64,12 @@ class ParcelService
     public function buildParcelsCriteria(User $user): array
     {
         return $user->isSender() ? ['sender' => $user] : [];
-    }    
+    } 
+    
+    public function paginate(QueryBuilder $queryBuilder, int $page = 1, int $limit)
+    {
+        return $this->paginator->paginate($queryBuilder, $page, $limit);
+    }
 
     public function create(Request $request): bool
     {
@@ -72,6 +77,7 @@ class ParcelService
         $form = $this->formFactory->create(SenderParcelFormType::class, $parcel);
         $parcel = $this->prepareObjectPreSave($parcel);
         $form->handleRequest($request);
+
         $dataSaved = false;
 
         if ($form->isValid()) {
